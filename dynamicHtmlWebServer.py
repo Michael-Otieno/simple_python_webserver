@@ -5,7 +5,11 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 shoppinglist = ['Wheat','Flour','Cooking oil']
 
 class Server(BaseHTTPRequestHandler):
+
+    """Run http GET request."""
     def do_GET(self):
+
+        # shopping list
         if self.path.endswith('/shoppinglist'):
             self.send_response(200)
             self.send_header('content-type','text/html')
@@ -17,11 +21,12 @@ class Server(BaseHTTPRequestHandler):
             output += '<h3><a href="/shoppinglist/new">Add New Item</a></h3>'
             for item in shoppinglist:
                 output += item
-                output += '<a href="/shoppinglist/%s/remove"> Del </a>' % item
+                output += '<a href="/shoppinglist/%s/remove">   Del </a>' % item
                 output += '</br>'
             output += '</body></html>'
             self.wfile.write(output.encode())
 
+        # Add new item to list
         if self.path.endswith('/new'):
             self.send_response(200)
             self.send_header('content-type','text/html')
@@ -39,28 +44,30 @@ class Server(BaseHTTPRequestHandler):
 
             self.wfile.write(output.encode())
 
-        
-    #     if self.path.endswith('/remove'):
-    #         listIDpath = self.path.split('/')[2]
-    #         print(listIDpath)
-    #         self.send_response(200)
-    #         self.send_header('content-type', 'text/html')
-    #         self.end_headers()
+        # Remove item from list
+        if self.path.endswith('/remove'):
+            listIDpath = self.path.split('/')[2]
+            print(listIDpath)
+            self.send_response(200)
+            self.send_header('content-type', 'text/html')
+            self.end_headers()
+  
+            output = ''
+            output += '<html><body>'
+            output += '<h1>Remove item: %s</h1>' % listIDpath.replace('%20', ' ')
+            output += '<form method="POST" enctype="multipart/form-data" action="/shoppinglist/%s/remove">' % listIDpath
+            output += '<input type="Submit" value="Remove"></form>'
+            output += '<a href="/shoppinglist">Cancel</a>'
 
-    #         output = ''
-    #         output += '<html><body>'
-    #         output += '<h1>Remove item: %s</h1>' % listIDpath.replace('%20', ' ')
-    #         output += '<form method="POST" enctype="multipart/form-data" action="/shoppinglist/%s/remove">' % listIDpath
-    #         output += '<input type="Submit" value="Remove"></form>'
-    #         output +=  '<a href="/shoppinglist">Cancel</a>'
+            output += '</body></html>'
 
-    #         output += '</body></html>'
-
-    #         self.wfile.write(output.encode())
+            self.wfile.write(output.encode())
 
 
 
     def do_POST(self):
+
+        # Post a new item
         if self.path.endswith('/new'):
             ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
             pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
@@ -70,13 +77,26 @@ class Server(BaseHTTPRequestHandler):
                 fields = cgi.parse_multipart(self.rfile, pdict)
                 new_item = fields.get('item')
                 shoppinglist.append(new_item[0])
-                # print(new_item)
 
             self.send_response(301)
             self.send_header('content-type','text/html')
             self.send_header('Location','/shoppinglist')
             self.end_headers()
         
+
+        # if self.path.endswith('/remove'):
+        #     listIDPath = self.path.split('/')[2]
+        #     ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
+        #     if ctype == 'multipart/form-data':
+        #         list_item = listIDPath.replace['%20',' ']
+        #         shoppinglist.remove(list_item)
+
+        #     self.send_response(301)
+        #     self.send_header('content-type','text/html')
+        #     self.send_header('Location','/shoppinglist')
+        #     self.end_headers()
+
+
 
 def main():
     PORT = 9000
