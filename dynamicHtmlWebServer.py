@@ -17,7 +17,7 @@ class Server(BaseHTTPRequestHandler):
             output += '<h3><a href="/shoppinglist/new">Add New Item</a></h3>'
             for shopping in shoppinglist:
                 output +=shopping
-                output += '<a href="/shoppinglist/%s/remove"> X </a>' % shopping
+                output += '<a href="/shoppinglist/%s/remove"> Del </a>' % shopping
                 output += '</br>'
             output += '</body></html>'
             self.wfile.write(output.encode())
@@ -38,6 +38,26 @@ class Server(BaseHTTPRequestHandler):
             output += '</body></html>'
 
             self.wfile.write(output.encode())
+
+        
+        if self.path.endswith('/remove'):
+            listIDpath = self.path.split('/')[2]
+            print(listIDpath)
+            self.send_response(200)
+            self.send_header('content-type', 'text/html')
+            self.end_headers()
+
+            output = ''
+            output += '<html><body>'
+            output += '<h1>Remove item: %s</h1>' % listIDpath.replace('%20', ' ')
+            output += '<form method="POST" enctype="multipart/form-data" action="/shoppinglist/%s/remove">' % listIDpath
+            output += '<input type="Submit" value="Remove"></form>'
+            output +=  '<a href="/shoppinglist">Cancel</a>'
+
+            output += '</body></html>'
+
+            self.wfile.write(output.encode())
+
 
         
 
